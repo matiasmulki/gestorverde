@@ -1,22 +1,31 @@
-# Gestor Verde — Base de datos MySQL
+# Gestor Verde
 
-Scripts de la base de datos del sistema de trazabilidad para viveros citrícolas **Gestor Verde**.
-Trabajo Práctico 2 — Seminario de Práctica, Universidad Siglo 21. Autor: Matías Fernando Mulki.
+Sistema de trazabilidad para viveros citrícolas (Vivero Citrus, Tucumán).
+Seminario de Práctica · Licenciatura en Informática · Universidad Siglo 21.
+Autor: Matías Fernando Mulki.
 
-## Requisitos
-MySQL Server 8.0 o superior (motor InnoDB, codificación utf8mb4).
+| Carpeta | Contenido | Entrega |
+|---|---|---|
+| `mysql/` | Scripts de la base de datos MySQL 8 (esquema, datos, consultas, operaciones, seguridad, rendimiento) y DER. | TP2 |
+| `prototipo-java/` | Prototipo en Java 17 con interfaz gráfica Swing, POO, JDBC y pruebas JUnit 5. | TP3 |
+| `docs/diagramas/` | Diagramas UML del prototipo (fuentes PlantUML e imágenes). | TP3 |
+| `docs/capturas/` | Capturas de la interfaz gráfica. | TP3 |
 
-## Orden de ejecución
+## Puesta en marcha rápida
 
-| Script | Contenido |
-|---|---|
-| `01_esquema.sql` | Crea la base `gestorverde`: 29 tablas, índices, 6 triggers y 2 vistas. |
-| `02_datos.sql` | Inserta los datos iniciales y de prueba. |
-| `03_consultas.sql` | Consultas Q-01 a Q-13. |
-| `04_operaciones_y_borrado.sql` | Inserción transaccional, anulación por asiento inverso y borrado. Contiene errores provocados a propósito para demostrar las restricciones: ejecutar con `--force`. |
-| `05_seguridad.sql` | Roles y usuarios con privilegios mínimos. |
-| `06_prueba_rendimiento.sql` | Opcional. Carga 500.000 eventos para la prueba de rendimiento (solo en una base de prueba). |
+1. Crear la base y el usuario de la aplicación (MySQL 8.0 o superior):
+   ```
+   cd mysql
+   mysql -u root -p --default-character-set=utf8mb4 < 01_esquema.sql
+   mysql -u root -p --default-character-set=utf8mb4 < 02_datos.sql
+   mysql -u root -p --default-character-set=utf8mb4 < 05_seguridad.sql
+   ```
+2. Compilar y ejecutar el prototipo (JDK 17 o superior y Maven):
+   ```
+   cd prototipo-java
+   mvn clean package
+   java -jar target/gestorverde-prototipo-1.0-jar-with-dependencies.jar
+   ```
+3. Ingresar con `jperez` / `Vivero2026!` (encargado de producción). Todos los usuarios de prueba usan la misma clave.
 
-
-## Diagrama entidad-relación
-La carpeta `der/` contiene la vista general y las dos vistas de detalle del modelo.
+Más detalles en `prototipo-java/README.md` y `mysql/README.md`.

@@ -1,0 +1,115 @@
+@startuml
+!include estilo.iuml
+interface Identificable <<interface>> {
+  +getId() : long
+  +getCodigo() : String
+}
+abstract class Lote {
+  -id : long
+  -codigo : String
+  -copa : Cultivar
+  -portainjerto : Cultivar
+  -materialOrigen : MaterialCertificado
+  -estado : EstadoLote
+  -cantidadActual : int
+  #Lote(id, codigo, ..., estado, cantidad, ...)
+  +{abstract} getClase() : ClaseLote
+  +{abstract} describirCombinacion() : String
+  +{abstract} crearDerivado(idUb, codUb, fecha) : Lote
+  +esAptoComoPortainjerto() : boolean
+  +validarYemasUtilizables(fecha)
+  +validarConsumo(cantidad)  «RN-01»
+  +validarAptoComoPortainjerto()
+  +quedaAgotado(cantidad) : boolean
+  +compareTo(otro : Lote) : int
+}
+class LotePortainjerto {
+  +esAptoComoPortainjerto() : boolean
+  +crearDerivado(...) : Lote
+}
+class LoteYemas {
+  +validarYemasUtilizables(fecha)  «RN-03»
+  +crearDerivado(...) : Lote
+}
+class LoteInjertado {
+  +LoteInjertado(idCampania, copa, pie, idUb, codUb, fecha)
+  +crearDerivado(...) : Lote
+}
+abstract class Ubicacion {
+  -id : long
+  -codigo : String
+  -tipo : String
+  +{abstract} getCapacidad() : int
+  +{abstract} getOcupacion() : int
+  +{abstract} admiteLotes() : boolean
+  +getHijos() : ListaEnlazada<Ubicacion>
+  +getNivelOcupacion() : NivelOcupacion
+  +validarRecepcion(cantidad)  «RN-05»
+}
+class UbicacionContenedora {
+  -hijos : ListaEnlazada<Ubicacion>
+  +agregarHijo(u : Ubicacion)
+  +getCapacidad() : int  «suma de hijos»
+}
+class UbicacionReceptora {
+  -capacidadMaxima : int
+  -ocupacion : int
+  +getCapacidad() : int
+}
+class MaterialCertificado {
+  -precinto : String
+  -nroCertificado : String
+  -fechaVencimiento : LocalDate
+  +verificarVigencia(fecha)  «RN-03»
+}
+class Cultivar {
+  -id : int
+  -nombre : String
+}
+class EventoLote <<inmutable>> {
+  -tipo : TipoEvento
+  -fechaHora : LocalDateTime
+  -cantidad : int
+  -EventoLote(b : Builder)
+  +{static} de(idLote, tipo, fecha, cant) : Builder
+  +getEfecto() : int
+}
+class "EventoLote.Builder" as Builder {
+  +origen(id) : Builder
+  +destino(id) : Builder
+  +empleado(id) : Builder
+  +construir() : EventoLote
+}
+enum ClaseLote {
+  PORTAINJERTO
+  YEMAS
+  INJERTADA
+}
+enum EstadoLote {
+  DESARROLLO_PIE
+  INJERTADO
+  CERRADO
+  ...
+  +esFinal() : boolean
+}
+enum TipoEvento {
+  INJERTACION
+  CONSUMO_INJERTACION
+  MERMA ...
+  -signo : int
+}
+Identificable <|.. Lote
+Identificable <|.. Ubicacion
+Lote <|-- LotePortainjerto
+Lote <|-- LoteYemas
+Lote <|-- LoteInjertado
+Ubicacion <|-- UbicacionContenedora
+Ubicacion <|-- UbicacionReceptora
+UbicacionContenedora o-- "0..*" Ubicacion : hijos
+Lote --> "0..1" MaterialCertificado
+Lote --> "0..2" Cultivar
+Lote --> EstadoLote
+Lote ..> ClaseLote
+EventoLote --> TipoEvento
+EventoLote +-- Builder
+@enduml

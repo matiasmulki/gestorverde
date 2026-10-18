@@ -1,0 +1,79 @@
+@startuml
+!include estilo.iuml
+abstract class ServicioBase {
+  #tx : Transacciones
+  #auditoria : AuditoriaDAO
+  #ServicioBase(tx, auditoria)
+  #ahora() : LocalDateTime
+}
+abstract class "ServicioOperacion<S>" as SO {
+  +ejecutar(sesion, solicitud : S) : Resultado  «final»
+  #{abstract} getNombreOperacion() : String
+  #{abstract} getPermisoRequerido() : Permiso
+  #{abstract} validarDatos(solicitud : S)
+  #{abstract} realizar(c, sesion, solicitud : S) : Resultado
+}
+class ServicioInjertacion
+class ServicioMovimiento
+class ServicioMerma
+class ServicioConsultas {
+  +obtenerEstructura(sesion) : Ubicacion
+  +ubicacionesCriticas(raiz) : ListaEnlazada  «Cola»
+  +listarLotes(sesion, criterio) : ListaEnlazada  «quicksort»
+  +buscarPorCodigo(sesion, cod) : Lote  «binaria»
+  +buscarPorCultivar(sesion, txt)  «secuencial»
+}
+class ServicioTrazabilidad {
+  +consultar(sesion, codigo) : ResultadoTrazabilidad
+  -recorrerHaciaOrigen(c, lote)  «Pila»
+  -recorrerHaciaAdelante(c, lote)  «Cola»
+}
+class ServicioAutenticacion {
+  +iniciarSesion(usuario, clave) : Sesion
+  ~calcularHash(clave, sal) : String
+}
+class Sesion {
+  -ultimaActividad : Instant
+  +exigir(permiso : Permiso)
+  +expirada() : boolean
+}
+interface Transacciones <<interface>> {
+  +ejecutar(op : Operacion<T>) : T
+}
+interface "Operacion<T>" as Op <<functional>> {
+  +ejecutar(c : Connection) : T
+}
+interface LoteDAO <<interface>>
+interface EventoDAO <<interface>>
+interface UbicacionDAO <<interface>>
+interface TrazabilidadDAO <<interface>>
+interface AuditoriaDAO <<interface>>
+class TransaccionesJdbc
+class LoteDAOJdbc
+class EventoDAOJdbc
+class UbicacionDAOJdbc
+class TrazabilidadDAOJdbc
+class AuditoriaDAOJdbc
+
+ServicioBase <|-- SO
+SO <|-- ServicioInjertacion : S = Solicitudes.Injertacion
+SO <|-- ServicioMovimiento : S = Solicitudes.Movimiento
+SO <|-- ServicioMerma : S = Solicitudes.Merma
+ServicioBase <|-- ServicioConsultas
+ServicioBase <|-- ServicioTrazabilidad
+ServicioBase <|-- ServicioAutenticacion
+ServicioBase --> Transacciones
+ServicioBase --> AuditoriaDAO
+SO ..> Sesion
+Transacciones ..> Op
+ServicioInjertacion --> LoteDAO
+ServicioInjertacion --> EventoDAO
+ServicioInjertacion --> UbicacionDAO
+ServicioTrazabilidad --> TrazabilidadDAO
+Transacciones <|.. TransaccionesJdbc
+LoteDAO <|.. LoteDAOJdbc
+EventoDAO <|.. EventoDAOJdbc
+UbicacionDAO <|.. UbicacionDAOJdbc
+TrazabilidadDAO <|.. TrazabilidadDAOJdbc
+AuditoriaDAO <|.. AuditoriaDAOJdbc
+@enduml

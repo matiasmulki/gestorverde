@@ -1,0 +1,58 @@
+@startuml
+!include estilo.iuml
+class "JFrame" as JF <<javax.swing>>
+class "JDialog" as JD <<javax.swing>>
+class "JPanel" as JP <<javax.swing>>
+class "AbstractTableModel" as ATM <<javax.swing.table>>
+class VentanaPrincipal {
+  -tarjetas : CardLayout
+  -paneles : Map<String, PanelBase>
+  +mostrar(clave : String)
+  +ejecutar(accion : AccionUI)
+  +mostrarResultado(r : Resultado)
+  +sesionExpirada(e)
+}
+abstract class PanelBase {
+  #ventana : VentanaPrincipal
+  #PanelBase(ventana, titulo, descripcion)
+  +{abstract} actualizar()
+}
+class PanelMapa
+class PanelLotes {
+  +getSeleccionado() : Lote
+}
+class PanelTrazabilidad
+class PanelRechazos
+abstract class "DialogoOperacion<S>" as DO {
+  -servicio : ServicioOperacion<S>
+  #agregarCampo(etiqueta, campo)
+  #{abstract} armarSolicitud() : S
+  ~confirmar()
+}
+class DialogoInjertacion
+class DialogoMovimiento
+class DialogoMerma
+class DialogoIngreso {
+  +getSesion() : Sesion
+}
+class "ModeloTabla<T>" as MT {
+  +columna(nombre, tipo, valor) : ModeloTabla<T>
+  +setDatos(lista : ListaEnlazada<T>)
+}
+JF <|-- VentanaPrincipal
+JP <|-- PanelBase
+PanelBase <|-- PanelMapa
+PanelBase <|-- PanelLotes
+PanelBase <|-- PanelTrazabilidad
+PanelBase <|-- PanelRechazos
+JD <|-- DO
+DO <|-- DialogoInjertacion : S = Injertacion
+DO <|-- DialogoMovimiento : S = Movimiento
+DO <|-- DialogoMerma : S = Merma
+JD <|-- DialogoIngreso
+ATM <|-- MT
+VentanaPrincipal o-- "4" PanelBase
+VentanaPrincipal ..> DO : abre
+PanelLotes --> MT
+PanelMapa --> MT
+@enduml

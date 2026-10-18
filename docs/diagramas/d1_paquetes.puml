@@ -1,0 +1,44 @@
+@startuml
+!include estilo.iuml
+skinparam componentStyle rectangle
+package "gestorverde" {
+  [App\n(raíz de composición)] as app
+  package "presentacion.swing" as pre {
+    [VentanaPrincipal · PanelBase y paneles\nDialogoOperacion~<S> y diálogos · ModeloTabla~<T>] as menu
+  }
+  package "aplicacion" as apl {
+    [ServicioOperacion~<S> · ServicioInjertacion\nServicioMovimiento · ServicioMerma\nServicioConsultas · ServicioTrazabilidad\nServicioAutenticacion · Sesion · Solicitudes] as serv
+  }
+  package "dominio" as dom {
+    [Lote (abstracta) y subclases · Ubicacion (Composite)\nEventoLote · MaterialCertificado · enums] as ent
+  }
+  package "persistencia" as per {
+    [Interfaces DAO · Transacciones · Operacion<T>] as dao
+  }
+  package "persistencia.jdbc" as jdbc {
+    [LoteDAOJdbc · EventoDAOJdbc · UbicacionDAOJdbc\nTransaccionesJdbc · ConfiguracionBD ...] as impl
+  }
+  package "estructuras" as est {
+    [ListaEnlazada<T> · Pila<T> · Cola<T>] as ed
+  }
+  package "algoritmos" as alg {
+    [Ordenamiento (quicksort) · Busqueda (binaria)] as al
+  }
+  package "excepciones" as exc {
+    [GestorVerdeException y subclases] as ex
+  }
+}
+database "MySQL 8\nesquema gestorverde" as db
+app --> menu : crea
+app --> impl : crea
+menu --> serv : invoca
+serv --> ent : aplica reglas
+serv ..> dao : depende de\ninterfaces
+impl ..|> dao : implementa
+impl --> db : JDBC
+serv --> al
+serv --> ed
+ent --> ed
+ent ..> ex
+serv ..> ex
+@enduml
